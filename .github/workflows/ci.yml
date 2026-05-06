@@ -1,0 +1,36 @@
+name: CI
+
+on: # когда запускать workflow
+  push: # когда push в ветку main
+    branches: [ main ]
+  pull_request: # когда pull request в ветку main
+    branches: [ main ]
+  workflow_dispatch:   # позволяет запускать вручную из UI
+
+jobs: # список задач
+  hello-job:
+    runs-on: ubuntu-latest # какой runner использовать
+    timeout-minutes: 10 # timeout в минутах
+
+    steps: # шаги выполнения
+      - name: Checkout repo
+        uses: actions/checkout@v4 # какой action использовать
+
+      - name: Show runner info
+        run: |
+          echo "Hello from GitHub Actions!"
+          echo "Repo: $GITHUB_REPOSITORY"
+          echo "Branch: $GITHUB_REF"
+          uname -a
+          pwd
+          ls -la
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Check Python
+        run: |
+          python --version
+          pip --version
