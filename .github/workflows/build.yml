@@ -8,15 +8,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.CI_REGISTRY_USERNAME  }}
-          password: ${{ secrets.CI_REGISTRY_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -27,5 +33,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.CI_REGISTRY_USERNAME  }}/ai-service:latest
-            ${{ secrets.CI_REGISTRY_USERNAME  }}/ai-service:${{ github.sha }}
+            ghcr.io/${{ github.actor }}/ai-service:latest
+            ghcr.io/${{ github.actor }}/ai-service:${{ github.sha }}
