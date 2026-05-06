@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ai-service.fullname" . }}-ui
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ai-service.selectorLabels" . | nindent 6 }}
+      app: ui
+  template:
+    metadata:
+      labels:
+        {{- include "ai-service.selectorLabels" . | nindent 8 }}
+        app: ui
+    spec:
+      containers:
+        - name: ai-ui
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["streamlit"]
+          args: ["run", "src/ui.py", "--server.port", "{{ .Values.ui.port }}", "--server.address", "0.0.0.0"]
+          ports:
+            - name: streamlit
+              containerPort: {{ .Values.ui.port }}
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi

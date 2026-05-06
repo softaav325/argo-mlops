@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: ml-pipeline-demo
+  namespace: argo
+spec:
+  serviceAccountName: argo-admin
+  entrypoint: ml-dag
+  # Общий том для всех шагов
+  volumes:
+    - name: workdir
+      persistentVolumeClaim:
+        claimName: argo-pipeline-pvc
+
+  templates:
+    - name: ml-dag
+      dag:
+        tasks:
+          - name: generate-data
+            template: generate-data-step
+          - name: train-model
+            dependencies: [generate-data]
+            template: train-model-step
+          - name: validate-metrics
+            dependencies: [train-model]
+            template: validate-metrics-step
+
+    - name: generate-data-step
+      container:
+        image: ml-pipeline-train:v3
+        imagePullPolicy: IfNotPresent
+        command: [python, /app/src/generate_data.py]
+        volumeMounts:
+          - name: workdir
+            mountPath: /app/data
+        workingDir: /app
+
+    - name: train-model-step
+      container:
+        image: ml-pipeline-train:v3
+        imagePullPolicy: IfNotPresent
+        command: [python, /app/src/train.py]
+        volumeMounts:
+          - name: workdir
+            mountPath: /app/data
+        workingDir: /app
+
+    - name: validate-metrics-step
+      container:
+        image: ml-pipeline-train:v3
+        imagePullPolicy: IfNotPresent
+        command: [ls, -R, /app/data]
+        volumeMounts:
+          - name: workdir
+            mountPath: /app/data
+        workingDir: /app
