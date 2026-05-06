@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: softaav325/ai-service
+  repository: ghcr.io/softaav325/ai-service
   pullPolicy: IfNotPresent
   tag: "latest"
 

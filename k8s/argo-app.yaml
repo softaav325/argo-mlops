@@ -3,21 +3,27 @@ kind: Application
 metadata:
   name: ai-service
   namespace: argocd
+
 spec:
   project: default
+
   source:
-    repoURL: https://github.com/softaav325/your-repo-name.git
-    targetRevision: HEAD
+    repoURL: https://github.com/softaav325/argo-mlops.git
+    targetRevision: main
     path: k8s/charts/ai-service
+
     helm:
       valueFiles:
         - values.yaml
+
   destination:
     server: https://kubernetes.default.svc
     namespace: ai-service
+
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+
     syncOptions:
       - CreateNamespace=true
