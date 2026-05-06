@@ -4,10 +4,16 @@ import requests
 st.title("🚨 ML Log Analyzer")
 log_input = st.text_area("Вставьте лог сервера:", "ERROR: disk full")
 
+import os
+API_URL = os.getenv('API_URL', 'http://localhost:8000')
+
 if st.button("Проверить"):
-    # ai-service — это имя сервиса в Kubernetes
-    response = requests.post("http://ai-service/predict", json={"text": log_input})
-    prediction = response.json().get("prediction")
+    try:
+        response = requests.post(f"{API_URL}/predict", json={"text": log_input})
+        prediction = response.json().get("prediction")
+    except Exception as e:
+        st.error(f"Ошибка подключения к API: {e}")
+        prediction = None
     
     if prediction == "error":
         st.error(f"Результат: {prediction.upper()}")

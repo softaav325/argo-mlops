@@ -6,7 +6,8 @@ import os
 app = FastAPI()
 
 # Load model and vectorizer
-MODEL_PATH = 'model.joblib'
+data_path = os.getenv('DATA_PATH', 'data')
+MODEL_PATH = os.path.join(data_path, 'model.joblib')
 if os.path.exists(MODEL_PATH):
     artifacts = joblib.load(MODEL_PATH)
     model = artifacts['model']

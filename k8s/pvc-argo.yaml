@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: argo-pipeline-pvc
-  namespace: argo
+  namespace: demo
 spec:
   accessModes:
     - ReadWriteOnce

@@ -7,7 +7,9 @@ import joblib
 
 def train_model():
     # Load data
-    df = pd.read_csv('/app/data/dataset.csv')
+    import os
+    data_path = os.getenv('DATA_PATH', 'data')
+    df = pd.read_csv(os.path.join(data_path, 'dataset.csv'))
     
     # Preprocessing
     X = df['text']
@@ -34,8 +36,9 @@ def train_model():
     print(f"F1 Score: {f1:.4f}")
     
     # Save model and vectorizer
-    joblib.dump({'model': model, 'vectorizer': vectorizer}, '/app/data/model.joblib')
-    print("Model saved to /app/data/model.joblib")
+    model_path = os.path.join(data_path, 'model.joblib')
+    joblib.dump({'model': model, 'vectorizer': vectorizer}, model_path)
+    print(f"Model saved to {model_path}")
 
 if __name__ == "__main__":
     train_model()
