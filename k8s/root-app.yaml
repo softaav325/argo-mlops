@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: default
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/softaav325/argo-mlops.git
+    targetRevision: main
+    path: k8s/argo-apps          
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

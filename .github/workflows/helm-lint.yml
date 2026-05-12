@@ -1,0 +1,29 @@
+name: Helm Lint
+on:
+  pull_request:
+    paths:
+      - 'k8s/charts/**'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+
+      - name: Helm Lint
+        run: |
+          for chart in $(find k8s/charts -maxdepth 1 -type d); do
+            echo "Linting $chart..."
+            helm lint $chart
+          done
+
+      - name: Helm Template Validation
+        run: |
+          for chart in $(find k8s/charts -maxdepth 1 -type d); do
+            echo "Templating $chart..."
+            helm template $chart
+          done

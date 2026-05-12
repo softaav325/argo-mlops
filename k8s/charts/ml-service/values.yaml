@@ -1,0 +1,26 @@
+# Default values for ml-service.
+replicaCount: 1
+
+image:
+  repository: ml-pipeline-train
+  pullPolicy: IfNotPresent
+  tag: "v3"
+
+serviceAccount:
+  create: true
+  name: argo-admin
+
+namespace: demo
+
+persistence:
+  enabled: true
+  pvcName: argo-pipeline-pvc
+  mountPath: /app/data
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 100m
+    memory: 512Mi

@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: {{ .Release.Name }}-pipeline-template
+  namespace: {{ .Values.namespace }}
+spec:
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  volumes:
+    - name: workdir
+      persistentVolumeClaim:
+        claimName: {{ .Values.persistence.pvcName }}
+
+  templates:
+    - name: ml-dag
+      dag:
+        tasks:
+          - name: generate-data
+            template: generate-data-step
+          - name: train-model
+            dependencies: [generate-data]
+            template: train-model-step
+          - name: validate-metrics
+            dependencies: [train-model]
+            template: validate-metrics-step
+
+    - name: generate-data-step
+      container:
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: [python, /app/src/generate_data.py]
+        volumeMounts:
+          - name: workdir
+            mountPath: {{ .Values.persistence.mountPath }}
+        workingDir: /app
+
+    - name: train-model-step
+      container:
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: [python, /app/src/train.py]
+        volumeMounts:
+          - name: workdir
+            mountPath: {{ .Values.persistence.mountPath }}
+        workingDir: /app
+
+    - name: validate-metrics-step
+      container:
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: [ls, -R, {{ .Values.persistence.mountPath }}]
+        volumeMounts:
+          - name: workdir
+            mountPath: {{ .Values.persistence.mountPath }}
+        workingDir: /app
