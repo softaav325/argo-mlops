@@ -2,7 +2,7 @@
 replicaCount: 1
 
 image:
-  repository: ml-pipeline-train
+  repository: ghcr.io/softaav325/ml-pipeline-train
   pullPolicy: IfNotPresent
   tag: "v3"
 
