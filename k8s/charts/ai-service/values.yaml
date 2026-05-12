@@ -12,3 +12,8 @@ api:
 ui:
   port: 8501
   servicePort: 8081
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 1Gi

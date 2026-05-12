@@ -50,11 +50,17 @@ docker build -t ml-pipeline-train:v3 -f Dockerfile.train .
 curl -L -o argo-workflows.tgz https://github.com/argoproj/argo-helm/releases/download/argo-workflows-1.0.13/argo-workflows-1.0.13.tgz
 helm install argo argo-workflows.tgz --namespace argo --create-namespace --set server.authMode=server
 
+kubectl port-forward service/argo-argocd-server -n default 8080:443
+    and then open the browser on http://localhost:8080 and accept the certificate
+
+After reaching the UI the first time you can login with username: admin and the random password generated during the installation. You can find the password by running:
+kubectl -n default get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
 # 2. Создание общего тома для данных
 kubectl apply -f k8s/pvc-argo.yaml
 
 # 3. Развертывание через Argo CD
-kubectl apply -f k8s/argo-app.yaml
+kubectl apply -f k8s/argo-app.yaml --insecure-skip-tls-verify
 ```
 
 ### Шаг 3: Запуск обучения
@@ -71,3 +77,8 @@ kubectl apply -f k8s/argo-pipeline.yaml
 - `k8s/`: Манифесты Kubernetes и определения Workflow.
 - `data/`: Локальное хранилище данных (используется при локальном запуске).
 - `Dockerfile.train`: Рецепт сборки среды выполнения.
+
+
+Patch Redis: helm upgrade argo argo/argo-cd  --namespace default  --reuse-values   --set redis.image.repository=redis   --set redis.image.registry=docker.io   --set redis.image.tag=7.2-alpine
+
+

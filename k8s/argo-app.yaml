@@ -6,8 +6,6 @@ metadata:
 
 spec:
   project: default
-  sourceNamespaces:
-    - demo
 
   source:
     repoURL: https://github.com/softaav325/argo-mlops.git
