@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: ai-service
-  namespace: default
+  namespace: default  # where object Application
 
 spec:
   project: default
@@ -18,7 +18,7 @@ spec:
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: ai-service
+    namespace: ai-service  # where Argo CD deployed app
 
   syncPolicy:
     automated:

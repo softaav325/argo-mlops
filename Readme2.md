@@ -37,18 +37,17 @@
 - **PVC (Persistent Volume Claim)**: Обеспечивает общую файловую систему (`/app/data`) для всех контейнеров в рамках одного Workflow.
 - **Argo App**: Конфигурация для автоматического развертывания ресурсов через Argo CD.
 
+
 ## ⚙️ Инструкция по запуску
 
-### Шаг 1: Сборка образа
-```bash
-docker build -t ml-pipeline-train:v3 -f Dockerfile.train .
-```
+# Install Argo CD with Helm:
+helm repo add argo https://argoproj.github.io/argo-helm
+helm repo update
+helm install argocd argo/argo-cd --namespace argocd --set controller.metrics.enabled=true
 
-### Шаг 2: Настройка инфраструктуры и K8s
-```bash
-# 1. Установка Argo Workflows через Helm
-curl -L -o argo-workflows.tgz https://github.com/argoproj/argo-helm/releases/download/argo-workflows-1.0.13/argo-workflows-1.0.13.tgz
-helm install argo argo-workflows.tgz --namespace argo --create-namespace --set server.authMode=server
+Deploy Applications via Helm:
+If Helm charts for AI-emotion/AI-koder exist, use them:
+kubectl apply -f argocd/applications/demo-app.yaml
 
 kubectl port-forward service/argo-argocd-server -n default 8080:443
     and then open the browser on http://localhost:8080 and accept the certificate
@@ -56,17 +55,32 @@ kubectl port-forward service/argo-argocd-server -n default 8080:443
 After reaching the UI the first time you can login with username: admin and the random password generated during the installation. You can find the password by running:
 kubectl -n default get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 
-# 2. Создание общего тома для данных
-kubectl apply -f k8s/pvc-argo.yaml
+# Install Argo Workflows with Helm:
+curl -L -o argo-workflows.tgz https://github.com/argoproj/argo-helm/releases/download/argo-workflows-1.0.13/argo-workflows-1.0.13.tgz
+helm install argo argo-workflows.tgz --namespace argo --create-namespace --set server.authMode=server
+
+kubectl -n argo port-forward svc/argo-argo-workflows-server 8082:2746 and then open the browser on http://localhost:8082 and accept the certificate
+
+
+### Шаг 1: build
+```bash
+docker build -t ml-pipeline-train:v3 -f Dockerfile.train .
+```
+
+
+
+
+
+### Шаг 2: Настройка инфраструктуры и K8s
 
 # 3. Развертывание через Argo CD
 kubectl apply -f k8s/argo-app.yaml --insecure-skip-tls-verify
 ```
 
-### Шаг 3: Запуск обучения
+### Шаг 3: Training model
 ```bash
 # Через Argo CLI
-argo submit -n argo -f k8s/argo-pipeline.yaml
+argo submit -n demo -f k8s/argo-pipeline.yaml
 
 # Или через kubectl
 kubectl apply -f k8s/argo-pipeline.yaml

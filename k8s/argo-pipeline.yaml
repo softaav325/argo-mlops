@@ -6,7 +6,7 @@ metadata:
 spec:
   serviceAccountName: argo-admin
   entrypoint: ml-dag
-  # Общий том для всех шагов
+  # share values
   volumes:
     - name: workdir
       persistentVolumeClaim:
@@ -54,3 +54,42 @@ spec:
           - name: workdir
             mountPath: /app/data
         workingDir: /app
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argo-admin
+  namespace: demo
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argo-admin-role
+  namespace: demo
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/exec", "pods/log"]
+    verbs: ["create", "get", "list", "watch", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims", "configmaps", "secrets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflows", "workflows/finalizers", "workflowtasksets", "workflowtaskresults"]
+    verbs: ["get", "list", "watch", "update", "patch", "create", "delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argo-admin-binding
+  namespace: demo
+subjects:
+  - kind: ServiceAccount
+    name: argo-admin
+    namespace: demo
+roleRef:
+  kind: Role
+  name: argo-admin-role
+  apiGroup: rbac.authorization.k8s.io
