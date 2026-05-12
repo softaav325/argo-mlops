@@ -10,5 +10,4 @@ COPY model.joblib .
 EXPOSE 8000
 EXPOSE 8501
 
-# По умолчанию запускаем API. Для UI команда будет переопределена в Deployment
 CMD ["uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8000"]
